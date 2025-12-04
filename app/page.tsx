@@ -35,6 +35,7 @@ export default function HomePage() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [preview, setPreview] = useState<any>(null)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -66,9 +67,27 @@ export default function HomePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
     setLoading(true)
 
     try {
+      // Validation
+      if (!person1_firstname || !person1_date || !person1_time || !person1_place) {
+        setError(lang === 'fr' ? 'Veuillez remplir tous les champs pour la personne 1' : 'Please fill all fields for person 1')
+        setLoading(false)
+        return
+      }
+      if (!person2_firstname || !person2_date || !person2_time || !person2_place) {
+        setError(lang === 'fr' ? 'Veuillez remplir tous les champs pour la personne 2' : 'Please fill all fields for person 2')
+        setLoading(false)
+        return
+      }
+      if (!email) {
+        setError(lang === 'fr' ? 'Veuillez entrer votre email' : 'Please enter your email')
+        setLoading(false)
+        return
+      }
+
       const payload: any = {
         person1: {
           firstname: person1_firstname,
@@ -97,21 +116,31 @@ export default function HomePage() {
         payload.person2.country = person2_coords.country
       }
 
+      console.log('Sending payload:', payload)
+
       const response = await fetch(`${API_BASE}/api/compatibility/astromatch`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
 
-      const report = await response.json()
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`API Error: ${response.status} - ${errorText}`)
+      }
 
-      await fetch(`${API_BASE}/api/compatibility/astromatch/save-email`, {
+      const report = await response.json()
+      console.log('Report received:', report)
+
+      // Save email (non-blocking)
+      fetch(`${API_BASE}/api/compatibility/astromatch/save-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
-      })
+      }).catch(err => console.error('Error saving email:', err))
 
-      await fetch(`${API_BASE}/api/compatibility/astromatch/log`, {
+      // Log (non-blocking)
+      fetch(`${API_BASE}/api/compatibility/astromatch/log`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -119,7 +148,7 @@ export default function HomePage() {
           person2_firstname,
           email,
         }),
-      })
+      }).catch(err => console.error('Error logging:', err))
 
       const historyEntry = {
         date: new Date().toISOString(),
@@ -142,8 +171,14 @@ export default function HomePage() {
       if (window.plausible) {
         window.plausible('compatibility_calculated')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error:', error)
+      setError(
+        error?.message || 
+        (lang === 'fr' 
+          ? 'Une erreur est survenue. Veuillez réessayer.' 
+          : 'An error occurred. Please try again.')
+      )
     } finally {
       setLoading(false)
     }
@@ -419,6 +454,16 @@ export default function HomePage() {
                   className="w-full rounded-xl bg-white/5 border border-white/20 px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/50 transition shadow-lg"
                 />
               </div>
+
+              {/* Error message */}
+              {error && (
+                <div className="relative z-10 bg-red-500/20 border border-red-500/50 rounded-xl p-4 text-red-200">
+                  <div className="flex items-center gap-2">
+                    <span>⚠️</span>
+                    <p>{error}</p>
+                  </div>
+                </div>
+              )}
 
               <button
                 type="submit"
