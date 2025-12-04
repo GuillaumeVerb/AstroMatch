@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { translations } from '../../translations'
@@ -13,7 +13,7 @@ declare global {
   }
 }
 
-export default function FullReportPage() {
+function FullReportContent() {
   const [lang, setLang] = useState<'fr' | 'en'>('fr')
   const [report, setReport] = useState<any>(null)
   const [firstname1, setFirstname1] = useState('')
@@ -185,6 +185,18 @@ export default function FullReportPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function FullReportPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-[#0b1020] to-[#120b2e] text-white flex items-center justify-center">
+        <p>Chargement...</p>
+      </div>
+    }>
+      <FullReportContent />
+    </Suspense>
   )
 }
 
