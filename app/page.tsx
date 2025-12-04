@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { translations } from '../translations'
+import PlaceAutocomplete from '../components/PlaceAutocomplete'
 
 const API_BASE = 'https://web-production-37fb.up.railway.app'
 
@@ -129,129 +130,225 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0b1020] to-[#120b2e] text-white">
-      <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-purple-500 bg-clip-text text-transparent">
-          AstroMatch
+    <div className="min-h-screen bg-gradient-to-br from-[#0b1020] via-[#1a1a2e] to-[#120b2e] text-white relative overflow-hidden">
+      {/* Stars background */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="star"></div>
+        <div className="star"></div>
+        <div className="star"></div>
+        <div className="star"></div>
+        <div className="star"></div>
+      </div>
+
+      {/* Floating planets */}
+      <div className="fixed inset-0 pointer-events-none opacity-20">
+        <div className="planet absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-yellow-400/30 to-purple-500/30 rounded-full blur-2xl"></div>
+        <div className="planet absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-purple-500/30 to-pink-500/30 rounded-full blur-3xl"></div>
+        <div className="planet absolute top-1/2 right-1/4 w-24 h-24 bg-gradient-to-br from-blue-400/30 to-cyan-500/30 rounded-full blur-xl"></div>
+      </div>
+
+      <nav className="container mx-auto px-4 py-6 flex justify-between items-center relative z-10">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-400 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-pulse">
+          ⭐ AstroMatch
         </h1>
         <div className="flex gap-4 items-center">
-          <Link href="/history" className="px-4 py-2 rounded-xl bg-white/5 border border-white/20 hover:bg-white/10 transition">
+          <Link
+            href="/history"
+            className="px-4 py-2 rounded-xl bg-white/5 border border-white/20 hover:bg-white/10 transition backdrop-blur-sm"
+          >
             {t.nav.history}
           </Link>
           <button
             onClick={handleLangToggle}
-            className="px-4 py-2 rounded-xl bg-white/5 border border-white/20 hover:bg-white/10 transition"
+            className="px-4 py-2 rounded-xl bg-white/5 border border-white/20 hover:bg-white/10 transition backdrop-blur-sm"
           >
             {lang === 'fr' ? 'EN' : 'FR'}
           </button>
         </div>
       </nav>
 
-      <div className="container mx-auto px-4 py-12 max-w-2xl">
+      <div className="container mx-auto px-4 py-12 max-w-3xl relative z-10">
         {!preview ? (
-          <form onSubmit={handleSubmit} className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl">
-            <h2 className="text-3xl font-bold mb-6">{t.form.title}</h2>
+          <div className="space-y-8">
+            {/* Hero section */}
+            <div className="text-center space-y-4 mb-8">
+              <h2 className="text-5xl font-bold bg-gradient-to-r from-yellow-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                {t.form.title}
+              </h2>
+              <p className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
+                {t.form.subtitle}
+              </p>
+            </div>
 
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-xl font-semibold mb-4">{t.form.person1}</h3>
-                <div className="space-y-4">
-                  <input
-                    type="text"
-                    placeholder={t.form.firstname}
-                    value={person1_firstname}
-                    onChange={(e) => setPerson1Firstname(e.target.value)}
-                    required
-                    className="w-full rounded-xl bg-white/5 border border-white/20 px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-yellow-400"
-                  />
-                  <input
-                    type="date"
-                    value={person1_date}
-                    onChange={(e) => setPerson1Date(e.target.value)}
-                    required
-                    className="w-full rounded-xl bg-white/5 border border-white/20 px-3 py-2 text-white focus:outline-none focus:border-yellow-400"
-                  />
-                  <input
-                    type="time"
-                    value={person1_time}
-                    onChange={(e) => setPerson1Time(e.target.value)}
-                    required
-                    className="w-full rounded-xl bg-white/5 border border-white/20 px-3 py-2 text-white focus:outline-none focus:border-yellow-400"
-                  />
-                  <input
-                    type="text"
-                    placeholder={t.form.place}
-                    value={person1_place}
-                    onChange={(e) => setPerson1Place(e.target.value)}
-                    required
-                    className="w-full rounded-xl bg-white/5 border border-white/20 px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-yellow-400"
-                  />
+            <form
+              onSubmit={handleSubmit}
+              className="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-xl shadow-2xl space-y-8"
+            >
+              <div className="grid md:grid-cols-2 gap-8">
+                {/* Person 1 */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-2xl">
+                      👤
+                    </div>
+                    <h3 className="text-2xl font-bold">{t.form.person1}</h3>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        {t.form.firstname}
+                      </label>
+                      <input
+                        type="text"
+                        value={person1_firstname}
+                        onChange={(e) => setPerson1Firstname(e.target.value)}
+                        required
+                        className="w-full rounded-xl bg-white/5 border border-white/20 px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/50 transition"
+                        placeholder={t.form.firstname}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        {t.form.dateLabel}
+                      </label>
+                      <input
+                        type="date"
+                        value={person1_date}
+                        onChange={(e) => setPerson1Date(e.target.value)}
+                        required
+                        className="w-full rounded-xl bg-white/5 border border-white/20 px-4 py-3 text-white focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/50 transition"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        {t.form.timeLabel}
+                      </label>
+                      <input
+                        type="time"
+                        value={person1_time}
+                        onChange={(e) => setPerson1Time(e.target.value)}
+                        required
+                        className="w-full rounded-xl bg-white/5 border border-white/20 px-4 py-3 text-white focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/50 transition"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        {t.form.place}
+                      </label>
+                      <PlaceAutocomplete
+                        value={person1_place}
+                        onChange={setPerson1Place}
+                        placeholder={t.form.place}
+                        lang={lang}
+                      />
+                      <p className="text-xs text-gray-400 mt-1">{t.form.placeHelp}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Person 2 */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-2xl">
+                      👤
+                    </div>
+                    <h3 className="text-2xl font-bold">{t.form.person2}</h3>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        {t.form.firstname}
+                      </label>
+                      <input
+                        type="text"
+                        value={person2_firstname}
+                        onChange={(e) => setPerson2Firstname(e.target.value)}
+                        required
+                        className="w-full rounded-xl bg-white/5 border border-white/20 px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition"
+                        placeholder={t.form.firstname}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        {t.form.dateLabel}
+                      </label>
+                      <input
+                        type="date"
+                        value={person2_date}
+                        onChange={(e) => setPerson2Date(e.target.value)}
+                        required
+                        className="w-full rounded-xl bg-white/5 border border-white/20 px-4 py-3 text-white focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        {t.form.timeLabel}
+                      </label>
+                      <input
+                        type="time"
+                        value={person2_time}
+                        onChange={(e) => setPerson2Time(e.target.value)}
+                        required
+                        className="w-full rounded-xl bg-white/5 border border-white/20 px-4 py-3 text-white focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        {t.form.place}
+                      </label>
+                      <PlaceAutocomplete
+                        value={person2_place}
+                        onChange={setPerson2Place}
+                        placeholder={t.form.place}
+                        lang={lang}
+                      />
+                      <p className="text-xs text-gray-400 mt-1">{t.form.placeHelp}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
+              {/* Email */}
               <div>
-                <h3 className="text-xl font-semibold mb-4">{t.form.person2}</h3>
-                <div className="space-y-4">
-                  <input
-                    type="text"
-                    placeholder={t.form.firstname}
-                    value={person2_firstname}
-                    onChange={(e) => setPerson2Firstname(e.target.value)}
-                    required
-                    className="w-full rounded-xl bg-white/5 border border-white/20 px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-yellow-400"
-                  />
-                  <input
-                    type="date"
-                    value={person2_date}
-                    onChange={(e) => setPerson2Date(e.target.value)}
-                    required
-                    className="w-full rounded-xl bg-white/5 border border-white/20 px-3 py-2 text-white focus:outline-none focus:border-yellow-400"
-                  />
-                  <input
-                    type="time"
-                    value={person2_time}
-                    onChange={(e) => setPerson2Time(e.target.value)}
-                    required
-                    className="w-full rounded-xl bg-white/5 border border-white/20 px-3 py-2 text-white focus:outline-none focus:border-yellow-400"
-                  />
-                  <input
-                    type="text"
-                    placeholder={t.form.place}
-                    value={person2_place}
-                    onChange={(e) => setPerson2Place(e.target.value)}
-                    required
-                    className="w-full rounded-xl bg-white/5 border border-white/20 px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-yellow-400"
-                  />
-                </div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  {t.form.email}
+                </label>
+                <input
+                  type="email"
+                  placeholder={t.form.email}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full rounded-xl bg-white/5 border border-white/20 px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/50 transition"
+                />
               </div>
-
-              <input
-                type="email"
-                placeholder={t.form.email}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full rounded-xl bg-white/5 border border-white/20 px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-yellow-400"
-              />
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full px-6 py-3 rounded-xl bg-gradient-to-r from-yellow-400 to-purple-500 text-black font-bold hover:opacity-90 transition disabled:opacity-50"
+                className="w-full px-8 py-4 rounded-xl bg-gradient-to-r from-yellow-400 via-purple-500 to-pink-500 text-black font-bold text-lg hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-purple-500/50 hover:shadow-purple-500/70"
               >
-                {loading ? t.form.loading : t.form.submit}
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="animate-spin">✨</span>
+                    {t.form.loading}
+                  </span>
+                ) : (
+                  t.form.submit
+                )}
               </button>
-            </div>
-          </form>
+            </form>
+          </div>
         ) : (
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl">
-            <h2 className="text-3xl font-bold mb-4">
+          <div className="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-xl shadow-2xl text-center space-y-6">
+            <div className="text-6xl mb-4">✨</div>
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-yellow-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
               {t.preview.title} {preview.overall_score}%
             </h2>
-            <p className="text-gray-300 mb-6">{t.preview.description}</p>
+            <p className="text-gray-300 text-lg leading-relaxed">{t.preview.description}</p>
             <button
               onClick={handleCheckout}
-              className="w-full px-6 py-3 rounded-xl bg-gradient-to-r from-yellow-400 to-purple-500 text-black font-bold hover:opacity-90 transition"
+              className="w-full px-8 py-4 rounded-xl bg-gradient-to-r from-yellow-400 via-purple-500 to-pink-500 text-black font-bold text-lg hover:opacity-90 transition shadow-lg shadow-purple-500/50 hover:shadow-purple-500/70"
             >
               {t.preview.unlock}
             </button>
@@ -261,4 +358,3 @@ export default function HomePage() {
     </div>
   )
 }
-
