@@ -101,7 +101,10 @@ function FullReportContent() {
   }
 
   const handleShare = async () => {
-    const text = `Compatibilité entre ${firstname1} & ${firstname2} : ${report?.overall_score || 0}% ✨\nAnalyse ton couple ici : https://astromatch.app`
+    const text = t.report.shareText
+      .replace('{firstname1}', firstname1)
+      .replace('{firstname2}', firstname2)
+      .replace('{score}', String(report?.overall_score || 0))
 
     try {
       await navigator.clipboard.writeText(text)
@@ -188,13 +191,26 @@ function FullReportContent() {
   )
 }
 
+function SuspenseFallback() {
+  const [lang, setLang] = useState<'fr' | 'en'>('fr')
+
+  useEffect(() => {
+    const savedLang = localStorage.getItem('astromatch_lang') as 'fr' | 'en' | null
+    if (savedLang) setLang(savedLang)
+  }, [])
+
+  const t = translations[lang]
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#0b1020] to-[#120b2e] text-white flex items-center justify-center">
+      <p>{t.report.loading}</p>
+    </div>
+  )
+}
+
 export default function FullReportPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-[#0b1020] to-[#120b2e] text-white flex items-center justify-center">
-        <p>Chargement...</p>
-      </div>
-    }>
+    <Suspense fallback={<SuspenseFallback />}>
       <FullReportContent />
     </Suspense>
   )

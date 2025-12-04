@@ -27,6 +27,7 @@ export const translations = {
       v2: 'Analyse V2',
       share: 'Partager mon score',
       shareSuccess: 'Score copié dans le presse-papiers!',
+      shareText: 'Compatibilité entre {firstname1} & {firstname2} : {score}% ✨\nAnalyse ton couple ici : https://astromatch.app',
       downloadPDF: 'Télécharger le PDF',
     },
     history: {
@@ -96,6 +97,7 @@ export const translations = {
       v2: 'V2 Analysis',
       share: 'Share my score',
       shareSuccess: 'Score copied to clipboard!',
+      shareText: 'Compatibility between {firstname1} & {firstname2} : {score}% ✨\nAnalyze your couple here : https://astromatch.app',
       downloadPDF: 'Download PDF',
     },
     history: {
