@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || ''
+const STRIPE_PRICE_ID = process.env.STRIPE_PRICE_ID || ''
 const API_BASE = 'https://web-production-37fb.up.railway.app'
 
 export async function POST(request: NextRequest) {
   try {
-    const { person1_firstname, person2_firstname } = await request.json()
+    if (!STRIPE_SECRET_KEY || !STRIPE_PRICE_ID) {
+      return NextResponse.json(
+        { error: 'Stripe configuration missing' },
+        { status: 500 }
+      )
+    }
 
     const stripe = require('stripe')(STRIPE_SECRET_KEY)
 
@@ -13,13 +19,7 @@ export async function POST(request: NextRequest) {
       payment_method_types: ['card'],
       line_items: [
         {
-          price_data: {
-            currency: 'eur',
-            product_data: {
-              name: `AstroMatch - ${person1_firstname} & ${person2_firstname}`,
-            },
-            unit_amount: 990,
-          },
+          price: STRIPE_PRICE_ID,
           quantity: 1,
         },
       ],
