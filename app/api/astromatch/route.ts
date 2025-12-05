@@ -1,15 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 const API_BASE = 'https://web-production-37fb.up.railway.app'
+const API_KEY = process.env.ASTROMATCH_API_KEY || ''
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
+    if (!API_KEY) {
+      return NextResponse.json(
+        { error: 'API key not configured' },
+        { status: 500 }
+      )
+    }
+
     const response = await fetch(`${API_BASE}/api/compatibility/astromatch`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-API-Key': API_KEY,
       },
       body: JSON.stringify(body),
     })
