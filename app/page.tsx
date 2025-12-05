@@ -7,6 +7,7 @@ import { translations } from '../translations'
 import PlaceAutocomplete from '../components/PlaceAutocomplete'
 import CompatibilityGauge from '../components/CompatibilityGauge'
 import ShareButtons from '../components/ShareButtons'
+import IntensityScores from '../components/IntensityScores'
 
 declare global {
   interface Window {
@@ -220,7 +221,7 @@ export default function HomePage() {
     }
   }
 
-  // Extract insights from report
+  // Extract insights from report with improved format handling
   const getInsights = () => {
     if (!preview) return null
 
@@ -230,33 +231,76 @@ export default function HomePage() {
       potential?: string
     } = {}
 
-    // Extract strongest dimension
-    if (preview.strongest_dimension) {
-      insights.strongest = preview.strongest_dimension
-    } else if (preview.analysis?.strongest_dimension) {
-      insights.strongest = preview.analysis.strongest_dimension
-    }
-
-    // Extract weakest dimension
-    if (preview.weakest_dimension) {
-      insights.weakest = preview.weakest_dimension
-    } else if (preview.analysis?.weakest_dimension) {
-      insights.weakest = preview.analysis.weakest_dimension
-    }
-
-    // Extract potential from interpretation
-    if (preview.interpretation?.description) {
-      const desc = preview.interpretation.description
-      // Try to extract a potential/evolution sentence
-      const sentences = desc.split(/[.!?]/).filter((s: string) => s.trim().length > 20)
-      if (sentences.length > 0) {
-        insights.potential = sentences[0].trim() + '.'
+    // Extract strongest dimension - try multiple paths
+    const strongestPaths = [
+      preview.strongest_dimension,
+      preview.analysis?.strongest_dimension,
+      preview.v2_dimensions?.strongest,
+      preview.v2?.strongest_dimension,
+      preview.dimensions?.strongest,
+    ]
+    
+    for (const path of strongestPaths) {
+      if (path && typeof path === 'string' && path.trim().length > 0) {
+        insights.strongest = path.trim()
+        break
       }
-    } else if (preview.analysis?.interpretation?.description) {
-      const desc = preview.analysis.interpretation.description
-      const sentences = desc.split(/[.!?]/).filter((s: string) => s.trim().length > 20)
-      if (sentences.length > 0) {
-        insights.potential = sentences[0].trim() + '.'
+    }
+
+    // Extract weakest dimension - try multiple paths
+    const weakestPaths = [
+      preview.weakest_dimension,
+      preview.analysis?.weakest_dimension,
+      preview.v2_dimensions?.weakest,
+      preview.v2?.weakest_dimension,
+      preview.dimensions?.weakest,
+    ]
+    
+    for (const path of weakestPaths) {
+      if (path && typeof path === 'string' && path.trim().length > 0) {
+        insights.weakest = path.trim()
+        break
+      }
+    }
+
+    // Extract potential from interpretation - try multiple paths and formats
+    const descPaths = [
+      preview.interpretation?.description,
+      preview.analysis?.interpretation?.description,
+      preview.description,
+      preview.analysis?.description,
+      preview.summary,
+    ]
+
+    for (const desc of descPaths) {
+      if (desc && typeof desc === 'string' && desc.trim().length > 20) {
+        // Try to extract a meaningful sentence
+        const sentences = desc.split(/[.!?]/).filter((s: string) => s.trim().length > 20 && s.trim().length < 150)
+        if (sentences.length > 0) {
+          // Take first meaningful sentence or one that mentions "potentiel", "évolution", "relation"
+          const meaningful = sentences.find((s: string) => 
+            /potentiel|évolution|relation|compatibilité|harmonie/i.test(s)
+          ) || sentences[0]
+          insights.potential = meaningful.trim() + '.'
+          break
+        }
+      }
+    }
+
+    // Fallback: if no potential found, create a generic one based on score
+    if (!insights.potential && preview.overall_score) {
+      if (preview.overall_score >= 70) {
+        insights.potential = lang === 'fr' 
+          ? 'Relation équilibrée, terrain favorable pour une belle évolution.'
+          : 'Balanced relationship, favorable ground for beautiful evolution.'
+      } else if (preview.overall_score >= 50) {
+        insights.potential = lang === 'fr'
+          ? 'Bonne compatibilité – Relation équilibrée avec un potentiel d\'évolution.'
+          : 'Good compatibility – Balanced relationship with evolution potential.'
+      } else {
+        insights.potential = lang === 'fr'
+          ? 'Relation avec des défis à surmonter, mais un potentiel de croissance mutuelle.'
+          : 'Relationship with challenges to overcome, but potential for mutual growth.'
       }
     }
 
@@ -574,22 +618,29 @@ export default function HomePage() {
             </form>
           </div>
         ) : (
-          <div className="bg-gradient-to-br from-white/10 via-white/5 to-white/5 border border-white/20 rounded-3xl p-8 backdrop-blur-2xl shadow-2xl relative overflow-hidden" style={{ boxShadow: '0 0 40px rgba(255,0,150,0.15)' }}>
+          <div className="bg-gradient-to-br from-white/10 via-white/5 to-white/5 border border-white/20 rounded-3xl p-8 backdrop-blur-2xl shadow-2xl relative overflow-hidden" style={{ boxShadow: '0 0 40px rgba(255,0,150,0.15)', border: '1px solid rgba(255,255,255,0.08)' }}>
             {/* Mystical gradient effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 via-purple-500/10 to-pink-500/10 opacity-50 blur-3xl"></div>
             
-            <div className="relative z-10 space-y-6">
-              {/* Title with names */}
-              <div className="text-center space-y-3">
-                <h2 className="text-4xl font-bold bg-gradient-to-r from-yellow-400 via-purple-500 via-pink-500 to-rose-500 bg-clip-text text-transparent">
-                  {t.preview.title.replace('{firstname1}', person1_firstname).replace('{firstname2}', person2_firstname)} : {preview.overall_score}%
+            <div className="relative z-10 space-y-5">
+              {/* Title with names - Score removed from title */}
+              <div className="text-center space-y-2">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-yellow-400 via-purple-500 via-pink-500 to-rose-500 bg-clip-text text-transparent">
+                  {t.preview.title.replace('{firstname1}', person1_firstname).replace('{firstname2}', person2_firstname)}
                 </h2>
-                <p className="text-sm text-yellow-400/80 font-medium">{t.preview.badge}</p>
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-2xl">👑</span>
+                  <p className="text-sm text-yellow-400 font-medium bg-yellow-400/10 px-3 py-1 rounded-full border border-yellow-400/30">
+                    {t.preview.badge}
+                  </p>
+                </div>
               </div>
 
-              {/* Compatibility Gauge */}
-              <div className="flex justify-center py-2">
+              {/* Compatibility Gauge with Score */}
+              <div className="flex flex-col items-center justify-center py-3 space-y-3">
                 <CompatibilityGauge score={preview.overall_score} size={140} />
+                {/* Mini Intensity Scores */}
+                <IntensityScores report={preview} lang={lang} />
               </div>
 
               {/* Share Buttons */}
@@ -605,33 +656,33 @@ export default function HomePage() {
 
               {/* Free Insights */}
               {insights && (insights.strongest || insights.weakest || insights.potential) && (
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-4">
-                  <h3 className="text-lg font-bold text-center text-gray-200">{t.preview.insights.title}</h3>
-                  <div className="space-y-3 text-left">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-3">
+                  <h3 className="text-base font-bold text-center text-gray-200">{t.preview.insights.title}</h3>
+                  <div className="space-y-2.5 text-left">
+                    {insights.potential && (
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-xl">✨</span>
+                        <div className="flex-1">
+                          <p className="font-semibold text-purple-400 text-sm">{t.preview.insights.potential}</p>
+                          <p className="text-gray-300 text-xs leading-relaxed">{insights.potential}</p>
+                        </div>
+                      </div>
+                    )}
                     {insights.strongest && (
-                      <div className="flex items-start gap-3">
-                        <span className="text-2xl">💪</span>
-                        <div>
-                          <p className="font-semibold text-yellow-400">{t.preview.insights.strongest}</p>
-                          <p className="text-gray-300 text-sm">{insights.strongest}</p>
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-xl">💪</span>
+                        <div className="flex-1">
+                          <p className="font-semibold text-yellow-400 text-sm">{t.preview.insights.strongest}</p>
+                          <p className="text-gray-300 text-xs leading-relaxed">{insights.strongest}</p>
                         </div>
                       </div>
                     )}
                     {insights.weakest && (
-                      <div className="flex items-start gap-3">
-                        <span className="text-2xl">⚡</span>
-                        <div>
-                          <p className="font-semibold text-orange-400">{t.preview.insights.weakest}</p>
-                          <p className="text-gray-300 text-sm">{insights.weakest}</p>
-                        </div>
-                      </div>
-                    )}
-                    {insights.potential && (
-                      <div className="flex items-start gap-3">
-                        <span className="text-2xl">✨</span>
-                        <div>
-                          <p className="font-semibold text-purple-400">{t.preview.insights.potential}</p>
-                          <p className="text-gray-300 text-sm">{insights.potential}</p>
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-xl">⚡</span>
+                        <div className="flex-1">
+                          <p className="font-semibold text-orange-400 text-sm">{t.preview.insights.weakest}</p>
+                          <p className="text-gray-300 text-xs leading-relaxed">{insights.weakest}</p>
                         </div>
                       </div>
                     )}
@@ -639,37 +690,56 @@ export default function HomePage() {
                 </div>
               )}
 
+              {/* Target Audience Section */}
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-3">
+                <h3 className="text-base font-bold text-center text-gray-200">{t.preview.target.title}</h3>
+                <p className="text-xs text-gray-400 text-center mb-2">{t.preview.target.description}</p>
+                <ul className="space-y-1.5 text-left">
+                  {t.preview.target.items.map((item, index) => (
+                    <li key={index} className="flex items-start gap-2 text-xs text-gray-300">
+                      <span className="text-purple-400 mt-0.5">✓</span>
+                      <span className="leading-relaxed">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
               {/* Benefits List */}
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-3">
-                <h3 className="text-lg font-bold text-center text-gray-200">{t.preview.benefits.title}</h3>
-                <ul className="space-y-2 text-left">
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-3">
+                <h3 className="text-base font-bold text-center text-gray-200">{t.preview.benefits.title}</h3>
+                <ul className="space-y-1.5 text-left">
                   {t.preview.benefits.items.map((item, index) => (
-                    <li key={index} className="flex items-start gap-2 text-sm text-gray-300">
-                      <span className="text-yellow-400 mt-1">•</span>
-                      <span>{item}</span>
+                    <li key={index} className="flex items-start gap-2 text-xs text-gray-300">
+                      <span className="text-yellow-400 mt-0.5">•</span>
+                      <span className="leading-relaxed">{item}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
               {/* PDF Premium Encart */}
-              <div className="bg-gradient-to-r from-yellow-500/10 via-purple-500/10 to-pink-500/10 border border-yellow-400/20 rounded-2xl p-5 text-center">
-                <p className="text-lg font-bold text-yellow-400 mb-1">{t.preview.pdf.title}</p>
-                <p className="text-sm text-gray-300">{t.preview.pdf.desc}</p>
+              <div className="bg-gradient-to-r from-yellow-500/10 via-purple-500/10 to-pink-500/10 border border-yellow-400/20 rounded-2xl p-4 text-center">
+                <p className="text-base font-bold text-yellow-400 mb-1">{t.preview.pdf.title}</p>
+                <p className="text-xs text-gray-300">{t.preview.pdf.desc}</p>
               </div>
 
-              {/* CTA Button */}
+              {/* CTA Button - Using primary variant */}
               <button
                 onClick={handleCheckout}
-                className="w-full px-8 py-5 rounded-xl bg-gradient-to-r from-yellow-400 via-purple-500 via-pink-500 to-rose-500 text-black font-bold text-xl hover:opacity-90 transition shadow-2xl shadow-purple-500/50 hover:shadow-purple-500/70 hover:scale-105 transform duration-300"
+                className="w-full px-8 py-4 rounded-xl bg-gradient-to-r from-yellow-400 via-purple-500 via-pink-500 to-rose-500 text-black font-bold text-lg hover:opacity-90 transition shadow-2xl shadow-purple-500/50 hover:shadow-purple-500/70 hover:scale-105 transform duration-300"
               >
-                {t.preview.cta}
+                {t.preview.cta.primary}
               </button>
 
-              {/* Secure Payment Text */}
-              <p className="text-xs text-center text-gray-400">
-                {t.preview.secure}
-              </p>
+              {/* Enhanced Guarantee Section */}
+              <div className="space-y-1.5">
+                {t.preview.guarantee.items.map((item, index) => (
+                  <div key={index} className="flex items-center gap-2 text-xs text-gray-400">
+                    <span className="text-green-400">✔</span>
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}

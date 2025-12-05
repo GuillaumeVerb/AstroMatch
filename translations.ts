@@ -21,13 +21,35 @@ export const translations = {
     },
     preview: {
       title: 'Compatibilité entre {firstname1} & {firstname2}',
-      badge: '🔥 Le rapport le plus demandé en 2025',
+      badge: '🔥 Le rapport le plus demandé',
       shareTitle: '✨ Partagez votre score ✨',
       insights: {
-        title: 'Quelques révélations gratuites',
+        title: '✨ Quelques révélations gratuites',
         strongest: 'Votre force principale',
-        weakest: 'Votre point de tension',
+        weakest: 'Votre point de vigilance',
         potential: 'Votre potentiel',
+      },
+      intensity: {
+        title: 'Scores détaillés',
+        harmony: '💛 Harmonie émotionnelle',
+        intensity: '🔥 Intensité',
+        karmic: '🜁 Destin / Karmique',
+        levels: {
+          low: 'Faible',
+          medium: 'Moyen',
+          high: 'Fort',
+        },
+      },
+      target: {
+        title: '💑 À qui s\'adresse ce rapport ?',
+        description: 'Ce rapport est idéal si vous souhaitez :',
+        items: [
+          'Comprendre le fonctionnement profond de votre relation',
+          'Explorer votre compatibilité amoureuse selon les piliers astrologiques',
+          'Identifier vos forces et vos défis',
+          'Découvrir votre potentiel karmique et vos dynamiques inconscientes',
+          'Obtenir un guide clair pour faire évoluer votre relation',
+        ],
       },
       benefits: {
         title: '💫 Ce que contient le rapport complet :',
@@ -46,7 +68,23 @@ export const translations = {
         title: '📄 PDF Premium inclus',
         desc: '≈ 10 pages d\'interprétations astrologiques détaillées',
       },
-      cta: '❤️ Découvrir votre destin amoureux — 9,90€',
+      cta: {
+        primary: '🔮 Débloquer le rapport complet — 9,90€',
+        variants: [
+          '🔮 Découvrir votre compatibilité complète — 9,90€',
+          '✨ Voir votre analyse astrologique — 9,90€',
+          '❤️ Débloquer le rapport complet — 9,90€',
+          '🌕 Obtenir votre lecture astrologique — 9,90€',
+        ],
+      },
+      guarantee: {
+        title: 'Garanties',
+        items: [
+          'Rapport immédiatement disponible après paiement',
+          'Paiement sécurisé par Stripe',
+          'Aucune création de compte nécessaire',
+        ],
+      },
       secure: 'Paiement sécurisé par Stripe • Accès immédiat',
       unlock: 'Débloquer le rapport complet - 9,90€',
     },
@@ -123,13 +161,35 @@ export const translations = {
     },
     preview: {
       title: 'Compatibility between {firstname1} & {firstname2}',
-      badge: '🔥 The most requested report in 2025',
+      badge: '🔥 The most requested report',
       shareTitle: '✨ Share your score ✨',
       insights: {
-        title: 'Some free revelations',
+        title: '✨ Some free revelations',
         strongest: 'Your main strength',
-        weakest: 'Your tension point',
+        weakest: 'Your vigilance point',
         potential: 'Your potential',
+      },
+      intensity: {
+        title: 'Detailed scores',
+        harmony: '💛 Emotional harmony',
+        intensity: '🔥 Intensity',
+        karmic: '🜁 Destiny / Karmic',
+        levels: {
+          low: 'Low',
+          medium: 'Medium',
+          high: 'High',
+        },
+      },
+      target: {
+        title: '💑 Who is this report for?',
+        description: 'This report is ideal if you want to:',
+        items: [
+          'Understand the deep workings of your relationship',
+          'Explore your romantic compatibility according to astrological pillars',
+          'Identify your strengths and challenges',
+          'Discover your karmic potential and unconscious dynamics',
+          'Get a clear guide to evolve your relationship',
+        ],
       },
       benefits: {
         title: '💫 What the full report contains:',
@@ -148,7 +208,23 @@ export const translations = {
         title: '📄 Premium PDF included',
         desc: '≈ 10 pages of detailed astrological interpretations',
       },
-      cta: '❤️ Discover your love destiny — €9.90',
+      cta: {
+        primary: '🔮 Unlock the full report — €9.90',
+        variants: [
+          '🔮 Discover your complete compatibility — €9.90',
+          '✨ See your astrological analysis — €9.90',
+          '❤️ Unlock the full report — €9.90',
+          '🌕 Get your astrological reading — €9.90',
+        ],
+      },
+      guarantee: {
+        title: 'Guarantees',
+        items: [
+          'Report immediately available after payment',
+          'Secure payment by Stripe',
+          'No account creation required',
+        ],
+      },
       secure: 'Secure payment by Stripe • Instant access',
       unlock: 'Unlock full report - €9.90',
     },
