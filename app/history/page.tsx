@@ -36,18 +36,18 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0b1020] to-[#120b2e] text-white">
+    <div className="min-h-screen bg-gradient-to-br from-[#0a0a1a] via-[#1a0a2e] to-[#0a0a1a] text-white">
       <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-purple-500 bg-clip-text text-transparent">
-          AstroMatch
-        </h1>
+        <Link href="/" className="text-3xl font-bold bg-gradient-to-r from-yellow-400 via-purple-500 to-pink-500 bg-clip-text text-transparent hover:opacity-80 transition cursor-pointer">
+          ✨ AstroMatch ✨
+        </Link>
         <div className="flex gap-4 items-center">
-          <Link href="/" className="px-4 py-2 rounded-xl bg-white/5 border border-white/20 hover:bg-white/10 transition">
+          <Link href="/" className="px-4 py-2 rounded-xl bg-white/5 border border-white/20 hover:bg-white/10 transition backdrop-blur-sm">
             {t.nav.home}
           </Link>
           <button
             onClick={handleLangToggle}
-            className="px-4 py-2 rounded-xl bg-white/5 border border-white/20 hover:bg-white/10 transition"
+            className="px-4 py-2 rounded-xl bg-white/5 border border-white/20 hover:bg-white/10 transition backdrop-blur-sm"
           >
             {lang === 'fr' ? 'EN' : 'FR'}
           </button>
@@ -55,7 +55,15 @@ export default function HistoryPage() {
       </nav>
 
       <div className="container mx-auto px-4 py-12 max-w-4xl">
-        <h2 className="text-3xl font-bold mb-6">{t.history.title}</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-3xl font-bold">{t.history.title}</h2>
+          <Link
+            href="/"
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-yellow-400/20 to-purple-500/20 border border-yellow-400/30 hover:bg-gradient-to-r hover:from-yellow-400/30 hover:to-purple-500/30 transition backdrop-blur-sm text-sm font-medium"
+          >
+            {lang === 'fr' ? '➕ Nouvelle analyse' : '➕ New analysis'}
+          </Link>
+        </div>
 
         {history.length === 0 ? (
           <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl text-center">
