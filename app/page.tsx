@@ -6,8 +6,6 @@ import Link from 'next/link'
 import { translations } from '../translations'
 import PlaceAutocomplete from '../components/PlaceAutocomplete'
 
-const API_BASE = 'https://web-production-37fb.up.railway.app'
-
 declare global {
   interface Window {
     plausible?: (event: string) => void
@@ -118,29 +116,30 @@ export default function HomePage() {
 
       console.log('Sending payload:', payload)
 
-      const response = await fetch(`${API_BASE}/api/compatibility/astromatch`, {
+      // Use Next.js API route to proxy the request (avoids CORS issues)
+      const response = await fetch('/api/astromatch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
 
       if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`API Error: ${response.status} - ${errorText}`)
+        const errorData = await response.json()
+        throw new Error(errorData.error || `API Error: ${response.status}`)
       }
 
       const report = await response.json()
       console.log('Report received:', report)
 
       // Save email (non-blocking)
-      fetch(`${API_BASE}/api/compatibility/astromatch/save-email`, {
+      fetch('/api/save-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       }).catch(err => console.error('Error saving email:', err))
 
       // Log (non-blocking)
-      fetch(`${API_BASE}/api/compatibility/astromatch/log`, {
+      fetch('/api/log', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

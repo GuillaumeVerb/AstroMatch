@@ -33,6 +33,7 @@ export const translations = {
       shareSuccess: 'Score copié dans le presse-papiers!',
       shareText: 'Compatibilité entre {firstname1} & {firstname2} : {score}% ✨\nAnalyse ton couple ici : https://astromatch.app',
       downloadPDF: 'Télécharger le PDF',
+      pdfError: 'Erreur lors du téléchargement du PDF',
     },
     history: {
       title: 'Historique des compatibilités',
@@ -107,6 +108,7 @@ export const translations = {
       shareSuccess: 'Score copied to clipboard!',
       shareText: 'Compatibility between {firstname1} & {firstname2} : {score}% ✨\nAnalyze your couple here : https://astromatch.app',
       downloadPDF: 'Download PDF',
+      pdfError: 'Error downloading PDF',
     },
     history: {
       title: 'Compatibility history',

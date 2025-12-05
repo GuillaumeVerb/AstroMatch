@@ -5,8 +5,6 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { translations } from '../../translations'
 
-const API_BASE = 'https://web-production-37fb.up.railway.app'
-
 declare global {
   interface Window {
     plausible?: (event: string) => void
@@ -27,7 +25,7 @@ function FullReportContent() {
 
     const sessionId = searchParams.get('session_id')
     if (sessionId) {
-      fetch(`${API_BASE}/api/compatibility/astromatch/verify-access`, {
+      fetch('/api/verify-access', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_id: sessionId }),
@@ -35,7 +33,7 @@ function FullReportContent() {
         if (window.plausible) {
           window.plausible('premium_unlocked')
         }
-      })
+      }).catch(err => console.error('Error verifying access:', err))
     }
 
     const savedReport = localStorage.getItem('astromatch_report')
@@ -62,7 +60,7 @@ function FullReportContent() {
     if (!report) return
 
     try {
-      const response = await fetch(`${API_BASE}/api/compatibility/astromatch/pdf`, {
+      const response = await fetch('/api/pdf', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -82,6 +80,10 @@ function FullReportContent() {
         }),
       })
 
+      if (!response.ok) {
+        throw new Error('Failed to generate PDF')
+      }
+
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -97,6 +99,7 @@ function FullReportContent() {
       }
     } catch (error) {
       console.error('Error downloading PDF:', error)
+      alert(t.report.pdfError || 'Error downloading PDF')
     }
   }
 

@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { translations } from '../../translations'
 
-const API_BASE = 'https://web-production-37fb.up.railway.app'
-
 export default function MatchMultiplePage() {
   const [lang, setLang] = useState<'fr' | 'en'>('fr')
   const [jsonInput, setJsonInput] = useState('')
@@ -31,17 +29,22 @@ export default function MatchMultiplePage() {
 
     try {
       const data = JSON.parse(jsonInput)
-      const response = await fetch(`${API_BASE}/api/compatibility/match-multiple`, {
+      const response = await fetch('/api/match-multiple', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
 
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Request failed')
+      }
+
       const result = await response.json()
       setResults(result)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error:', error)
-      alert(t.matchMultiple.error)
+      alert(error.message || t.matchMultiple.error)
     } finally {
       setLoading(false)
     }
