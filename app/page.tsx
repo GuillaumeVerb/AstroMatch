@@ -23,14 +23,15 @@ interface Coordinates {
 
 export default function HomePage() {
   const [lang, setLang] = useState<'fr' | 'en'>('fr')
+  const [usePersonalLabels, setUsePersonalLabels] = useState(false)
   const [person1_firstname, setPerson1Firstname] = useState('')
   const [person1_date, setPerson1Date] = useState('')
-  const [person1_time, setPerson1Time] = useState('')
+  const [person1_time, setPerson1Time] = useState('12:00')
   const [person1_place, setPerson1Place] = useState('')
   const [person1_coords, setPerson1Coords] = useState<Coordinates | null>(null)
   const [person2_firstname, setPerson2Firstname] = useState('')
   const [person2_date, setPerson2Date] = useState('')
-  const [person2_time, setPerson2Time] = useState('')
+  const [person2_time, setPerson2Time] = useState('12:00')
   const [person2_place, setPerson2Place] = useState('')
   const [person2_coords, setPerson2Coords] = useState<Coordinates | null>(null)
   const [email, setEmail] = useState('')
@@ -409,13 +410,24 @@ export default function HomePage() {
               <div className="relative z-10 grid md:grid-cols-2 gap-10">
                 {/* Person 1 */}
                 <div className="space-y-6">
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 flex items-center justify-center text-3xl shadow-lg shadow-yellow-500/50">
-                      ☀️
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 flex items-center justify-center text-3xl shadow-lg shadow-yellow-500/50">
+                        ☀️
+                      </div>
+                      <h3 className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+                        {usePersonalLabels ? t.form.person1Label : t.form.person1}
+                      </h3>
                     </div>
-                    <h3 className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-                      {t.form.person1}
-                    </h3>
+                    <button
+                      type="button"
+                      onClick={() => setUsePersonalLabels(!usePersonalLabels)}
+                      className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/20 hover:bg-white/10 transition text-xs text-gray-300 flex items-center gap-1.5"
+                      title={lang === 'fr' ? 'Basculer entre "Personne 1/2" et "Vous/Partenaire"' : 'Toggle between "Person 1/2" and "You/Partner"'}
+                    >
+                      <span>{usePersonalLabels ? '💁' : '👤'}</span>
+                      <span className="hidden sm:inline">{usePersonalLabels ? t.form.person1Label : t.form.person1}</span>
+                    </button>
                   </div>
                   <div className="space-y-5">
                     <div>
@@ -457,6 +469,7 @@ export default function HomePage() {
                         required
                         className="w-full rounded-xl bg-white/5 border border-white/20 px-4 py-3 text-white focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/50 transition shadow-lg"
                       />
+                      <p className="text-xs text-gray-400 mt-1.5">{t.form.timeHelp}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
@@ -479,13 +492,15 @@ export default function HomePage() {
 
                 {/* Person 2 */}
                 <div className="space-y-6">
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 flex items-center justify-center text-3xl shadow-lg shadow-purple-500/50">
-                      🌙
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 flex items-center justify-center text-3xl shadow-lg shadow-purple-500/50">
+                        🌙
+                      </div>
+                      <h3 className="text-3xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
+                        {usePersonalLabels ? t.form.person2Label : t.form.person2}
+                      </h3>
                     </div>
-                    <h3 className="text-3xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
-                      {t.form.person2}
-                    </h3>
                   </div>
                   <div className="space-y-5">
                     <div>
@@ -527,6 +542,7 @@ export default function HomePage() {
                         required
                         className="w-full rounded-xl bg-white/5 border border-white/20 px-4 py-3 text-white focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition shadow-lg"
                       />
+                      <p className="text-xs text-gray-400 mt-1.5">{t.form.timeHelp}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
@@ -546,6 +562,13 @@ export default function HomePage() {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Motivation text */}
+              <div className="relative z-10 text-center">
+                <p className="text-sm text-gray-400 italic">
+                  {t.form.motivation}
+                </p>
               </div>
 
               {/* Email */}
@@ -615,6 +638,13 @@ export default function HomePage() {
                   </span>
                 )}
               </button>
+
+              {/* Privacy & Trust Text */}
+              <div className="relative z-10 text-center pt-2">
+                <p className="text-xs text-gray-400 leading-relaxed">
+                  {t.form.privacy}
+                </p>
+              </div>
             </form>
           </div>
         ) : (
