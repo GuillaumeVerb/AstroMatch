@@ -113,8 +113,11 @@ export const translations = {
       v2: 'Analyse V2',
       share: 'Partager mon score',
       shareSuccess: 'Score copié dans le presse-papiers!',
+      shareError: 'Erreur lors de la copie',
       shareText: 'Compatibilité entre {firstname1} & {firstname2} : {score}% ✨\nAnalyse ton couple ici : https://astromatch.app',
       downloadPDF: 'Télécharger le PDF',
+      pdfGenerating: 'Génération du PDF...',
+      pdfSuccess: 'PDF téléchargé avec succès !',
       pdfError: 'Erreur lors du téléchargement du PDF',
     },
     history: {
@@ -128,6 +131,7 @@ export const translations = {
       submit: 'Calculer',
       loading: 'Calcul en cours...',
       results: 'Résultats',
+      success: 'Calcul réussi !',
       error: 'Erreur lors du calcul',
     },
     landing: {
@@ -270,8 +274,11 @@ export const translations = {
       v2: 'V2 Analysis',
       share: 'Share my score',
       shareSuccess: 'Score copied to clipboard!',
+      shareError: 'Error copying',
       shareText: 'Compatibility between {firstname1} & {firstname2} : {score}% ✨\nAnalyze your couple here : https://astromatch.app',
       downloadPDF: 'Download PDF',
+      pdfGenerating: 'Generating PDF...',
+      pdfSuccess: 'PDF downloaded successfully!',
       pdfError: 'Error downloading PDF',
     },
     history: {
@@ -285,6 +292,7 @@ export const translations = {
       submit: 'Calculate',
       loading: 'Calculating...',
       results: 'Results',
+      success: 'Calculation successful!',
       error: 'Error calculating',
     },
     landing: {

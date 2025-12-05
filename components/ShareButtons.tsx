@@ -1,6 +1,7 @@
 'use client'
 
 import { translations } from '../translations'
+import { useToast } from './ToastContainer'
 
 interface ShareButtonsProps {
   firstname1: string
@@ -17,6 +18,7 @@ export default function ShareButtons({
   lang,
   onShare,
 }: ShareButtonsProps) {
+  const { showToast } = useToast()
   const t = translations[lang].preview
 
   const shareText = lang === 'fr'
@@ -54,20 +56,34 @@ export default function ShareButtons({
   const handleInstagram = async () => {
     try {
       await navigator.clipboard.writeText(instagramText)
-      alert(lang === 'fr' ? 'Texte Instagram copié ! Collez-le dans votre Story ou Post 📸' : 'Instagram text copied! Paste it in your Story or Post 📸')
+      showToast(lang === 'fr' ? 'Texte Instagram copié ! Collez-le dans votre Story ou Post 📸' : 'Instagram text copied! Paste it in your Story or Post 📸', 'success')
       onShare?.()
+      if (window.plausible) {
+        window.plausible('instagram_shared')
+      }
     } catch (error) {
       console.error('Error copying:', error)
+      showToast(lang === 'fr' ? 'Erreur lors de la copie' : 'Error copying', 'error')
+      if (window.plausible) {
+        window.plausible('share_error_instagram')
+      }
     }
   }
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(fullShareText)
-      alert(lang === 'fr' ? 'Lien copié dans le presse-papiers !' : 'Link copied to clipboard!')
+      showToast(lang === 'fr' ? 'Lien copié dans le presse-papiers !' : 'Link copied to clipboard!', 'success')
       onShare?.()
+      if (window.plausible) {
+        window.plausible('link_copied')
+      }
     } catch (error) {
       console.error('Error copying:', error)
+      showToast(lang === 'fr' ? 'Erreur lors de la copie' : 'Error copying', 'error')
+      if (window.plausible) {
+        window.plausible('share_error_copy')
+      }
     }
   }
 

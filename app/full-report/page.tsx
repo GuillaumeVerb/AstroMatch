@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { translations } from '../../translations'
+import { useToast } from '../../components/ToastContainer'
 
 declare global {
   interface Window {
@@ -17,7 +18,9 @@ function FullReportContent() {
   const [firstname1, setFirstname1] = useState('')
   const [firstname2, setFirstname2] = useState('')
   const [loading, setLoading] = useState(true)
+  const [pdfLoading, setPdfLoading] = useState(false)
   const searchParams = useSearchParams()
+  const { showToast } = useToast()
 
   useEffect(() => {
     const savedLang = localStorage.getItem('astromatch_lang') as 'fr' | 'en' | null
@@ -57,9 +60,14 @@ function FullReportContent() {
   }
 
   const handleDownloadPDF = async () => {
-    if (!report) return
+    if (!report || pdfLoading) return
+
+    const startTime = Date.now()
+    setPdfLoading(true)
 
     try {
+      showToast(t.report.pdfGenerating || 'Génération du PDF en cours...', 'info')
+
       const response = await fetch('/api/pdf', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -81,25 +89,39 @@ function FullReportContent() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to generate PDF')
+        const errorData = await response.json().catch(() => ({ error: 'Failed to generate PDF' }))
+        throw new Error(errorData.error || t.report.pdfError || 'Error downloading PDF')
       }
 
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `astromatch-${firstname1}-${firstname2}.pdf`
+      
+      // Clean filename: remove special characters
+      const cleanName1 = firstname1.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()
+      const cleanName2 = firstname2.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()
+      a.download = `astromatch-${cleanName1}-${cleanName2}.pdf`
+      
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
       window.URL.revokeObjectURL(url)
 
+      const duration = Date.now() - startTime
       if (window.plausible) {
         window.plausible('pdf_downloaded')
       }
-    } catch (error) {
+
+      showToast(t.report.pdfSuccess || 'PDF téléchargé avec succès !', 'success')
+    } catch (error: any) {
       console.error('Error downloading PDF:', error)
-      alert(t.report.pdfError || 'Error downloading PDF')
+      if (window.plausible) {
+        window.plausible('pdf_error')
+      }
+      showToast(error.message || t.report.pdfError || 'Erreur lors du téléchargement du PDF', 'error')
+    } finally {
+      setPdfLoading(false)
     }
   }
 
@@ -111,9 +133,16 @@ function FullReportContent() {
 
     try {
       await navigator.clipboard.writeText(text)
-      alert(t.report.shareSuccess)
+      showToast(t.report.shareSuccess || 'Score copié dans le presse-papiers !', 'success')
+      if (window.plausible) {
+        window.plausible('score_shared')
+      }
     } catch (error) {
       console.error('Error sharing:', error)
+      showToast(t.report.shareError || 'Erreur lors de la copie', 'error')
+      if (window.plausible) {
+        window.plausible('share_error')
+      }
     }
   }
 
@@ -169,9 +198,19 @@ function FullReportContent() {
             </button>
             <button
               onClick={handleDownloadPDF}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-yellow-400 to-purple-500 text-black font-bold hover:opacity-90 transition"
+              disabled={pdfLoading}
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-yellow-400 to-purple-500 text-black font-bold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              aria-label={t.report.downloadPDF}
+              aria-busy={pdfLoading}
             >
-              {t.report.downloadPDF}
+              {pdfLoading ? (
+                <>
+                  <span className="animate-spin">⏳</span>
+                  <span>{t.report.pdfGenerating || 'Génération...'}</span>
+                </>
+              ) : (
+                t.report.downloadPDF
+              )}
             </button>
           </div>
         </div>

@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { translations } from '../../translations'
+import { useToast } from '../../components/ToastContainer'
 
 export default function MatchMultiplePage() {
   const [lang, setLang] = useState<'fr' | 'en'>('fr')
   const [jsonInput, setJsonInput] = useState('')
   const [results, setResults] = useState<any>(null)
   const [loading, setLoading] = useState(false)
+  const { showToast } = useToast()
 
   useEffect(() => {
     const savedLang = localStorage.getItem('astromatch_lang') as 'fr' | 'en' | null
@@ -42,9 +44,16 @@ export default function MatchMultiplePage() {
 
       const result = await response.json()
       setResults(result)
+      showToast(t.matchMultiple.success || 'Calcul réussi !', 'success')
+      if (window.plausible) {
+        window.plausible('match_multiple_success')
+      }
     } catch (error: any) {
       console.error('Error:', error)
-      alert(error.message || t.matchMultiple.error)
+      showToast(error.message || t.matchMultiple.error, 'error')
+      if (window.plausible) {
+        window.plausible('match_multiple_error')
+      }
     } finally {
       setLoading(false)
     }

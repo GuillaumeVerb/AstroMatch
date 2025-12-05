@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { translations } from '../translations'
+import { useToast } from '../components/ToastContainer'
 import PlaceAutocomplete from '../components/PlaceAutocomplete'
 import CompatibilityGauge from '../components/CompatibilityGauge'
 import ShareButtons from '../components/ShareButtons'
@@ -40,6 +41,7 @@ export default function HomePage() {
   const [preview, setPreview] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const { showToast } = useToast()
 
   useEffect(() => {
     const savedLang = localStorage.getItem('astromatch_lang') as 'fr' | 'en' | null
@@ -189,12 +191,15 @@ export default function HomePage() {
       }
     } catch (error: any) {
       console.error('Error:', error)
-      setError(
-        error?.message || 
+      const errorMessage = error?.message || 
         (lang === 'fr' 
           ? 'Une erreur est survenue. Veuillez réessayer.' 
           : 'An error occurred. Please try again.')
-      )
+      setError(errorMessage)
+      showToast(errorMessage, 'error')
+      if (window.plausible) {
+        window.plausible('compatibility_error')
+      }
     } finally {
       setLoading(false)
     }
@@ -693,9 +698,9 @@ export default function HomePage() {
 
               {/* Error message */}
               {error && (
-                <div className="relative z-10 bg-red-500/20 border border-red-500/50 rounded-xl p-4 text-red-200">
+                <div className="relative z-10 bg-red-500/20 border border-red-500/50 rounded-xl p-4 text-red-200" role="alert" aria-live="assertive">
                   <div className="flex items-center gap-2">
-                    <span>⚠️</span>
+                    <span aria-hidden="true">⚠️</span>
                     <p>{error}</p>
                   </div>
                 </div>
@@ -704,6 +709,8 @@ export default function HomePage() {
               <button
                 type="submit"
                 disabled={loading}
+                aria-label={t.form.submit}
+                aria-busy={loading}
                 className="relative z-10 w-full px-8 py-5 rounded-xl bg-gradient-to-r from-yellow-400 via-purple-500 via-pink-500 to-rose-500 text-black font-bold text-xl hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-2xl shadow-purple-500/50 hover:shadow-purple-500/70 hover:scale-105 transform duration-300"
               >
                 {loading ? (

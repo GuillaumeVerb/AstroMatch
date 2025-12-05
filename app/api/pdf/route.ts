@@ -26,10 +26,19 @@ export async function POST(request: NextRequest) {
 
     // Return the PDF blob
     const blob = await response.blob()
+    
+    // Generate clean filename
+    const name1 = body.person1?.firstname || 'person1'
+    const name2 = body.person2?.firstname || 'person2'
+    const cleanName1 = name1.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()
+    const cleanName2 = name2.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()
+    const filename = `astromatch-${cleanName1}-${cleanName2}.pdf`
+    
     return new NextResponse(blob, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': 'attachment',
+        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Content-Length': blob.size.toString(),
       },
     })
   } catch (error: any) {
