@@ -1,5 +1,7 @@
 'use client'
 
+import { translations } from '../translations'
+
 interface ShareButtonsProps {
   firstname1: string
   firstname2: string
@@ -15,6 +17,8 @@ export default function ShareButtons({
   lang,
   onShare,
 }: ShareButtonsProps) {
+  const t = translations[lang].preview
+
   const shareText = lang === 'fr'
     ? `🔮 Compatibilité entre ${firstname1} & ${firstname2} : ${score}% ✨\n\nDécouvre ta compatibilité astrologique ici :`
     : `🔮 Compatibility between ${firstname1} & ${firstname2} : ${score}% ✨\n\nDiscover your astrological compatibility here:`
@@ -78,9 +82,14 @@ export default function ShareButtons({
 
   return (
     <div className="space-y-3">
-      <p className="text-sm font-medium text-gray-300 text-center">
-        {lang === 'fr' ? '✨ Partagez votre score ✨' : '✨ Share your score ✨'}
-      </p>
+      <div className="text-center space-y-1">
+        <p className="text-sm font-medium text-gray-300">
+          {t.shareTitle}
+        </p>
+        <p className="text-xs text-gray-400">
+          {t.shareEncouragement}
+        </p>
+      </div>
       <div className="flex flex-wrap justify-center gap-3">
         <button
           onClick={handleTwitter}

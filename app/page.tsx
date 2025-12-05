@@ -230,6 +230,11 @@ export default function HomePage() {
       strongest?: string
       weakest?: string
       potential?: string
+      firstImpression?: string
+      destiny?: string
+      hiddenTension?: string
+      communication?: string
+      karmic?: string
     } = {}
 
     // Extract strongest dimension - try multiple paths
@@ -302,6 +307,80 @@ export default function HomePage() {
         insights.potential = lang === 'fr'
           ? 'Relation avec des défis à surmonter, mais un potentiel de croissance mutuelle.'
           : 'Relationship with challenges to overcome, but potential for mutual growth.'
+      }
+    }
+
+    // Extract first impression
+    const firstImpressionPaths = [
+      preview.first_impression,
+      preview.analysis?.first_impression,
+      preview.v2?.first_impression,
+      preview.dimensions?.first_impression,
+    ]
+    for (const path of firstImpressionPaths) {
+      if (path && typeof path === 'string' && path.trim().length > 10) {
+        insights.firstImpression = path.trim()
+        break
+      }
+    }
+
+    // Extract destiny
+    const destinyPaths = [
+      preview.destiny,
+      preview.analysis?.destiny,
+      preview.v2?.destiny,
+      preview.destiny_score,
+    ]
+    for (const path of destinyPaths) {
+      if (path && typeof path === 'string' && path.trim().length > 10) {
+        insights.destiny = path.trim()
+        break
+      }
+    }
+
+    // Extract hidden tension
+    const tensionPaths = [
+      preview.hidden_tension,
+      preview.analysis?.hidden_tension,
+      preview.v2?.hidden_tension,
+      preview.tension,
+      preview.analysis?.tension,
+    ]
+    for (const path of tensionPaths) {
+      if (path && typeof path === 'string' && path.trim().length > 10) {
+        insights.hiddenTension = path.trim()
+        break
+      }
+    }
+
+    // Extract communication insight from description
+    const commDescPaths = [
+      preview.interpretation?.description,
+      preview.analysis?.interpretation?.description,
+      preview.description,
+      preview.analysis?.description,
+    ]
+    for (const desc of commDescPaths) {
+      if (desc && typeof desc === 'string') {
+        const sentences = desc.split(/[.!?]/).filter((s: string) => s.trim().length > 15 && s.trim().length < 120)
+        // Look for communication-related sentences
+        if (!insights.communication) {
+          const commSentence = sentences.find((s: string) => 
+            /communication|dialogue|échange|parler|écouter/i.test(s)
+          )
+          if (commSentence) {
+            insights.communication = commSentence.trim() + '.'
+          }
+        }
+        // Look for karmic-related sentences
+        if (!insights.karmic) {
+          const karmicSentence = sentences.find((s: string) => 
+            /karmique|karma|destin|mission|réincarnation/i.test(s)
+          )
+          if (karmicSentence) {
+            insights.karmic = karmicSentence.trim() + '.'
+          }
+        }
       }
     }
 
@@ -669,12 +748,16 @@ export default function HomePage() {
               {/* Compatibility Gauge with Score */}
               <div className="flex flex-col items-center justify-center py-3 space-y-3">
                 <CompatibilityGauge score={preview.overall_score} size={140} />
+                {/* Micro-text under gauge */}
+                <p className="text-xs text-gray-400 text-center px-4">
+                  {t.preview.gaugeSubtext}
+                </p>
                 {/* Mini Intensity Scores */}
                 <IntensityScores report={preview} lang={lang} />
               </div>
 
               {/* Share Buttons */}
-              <div className="py-2">
+              <div className="py-2 bg-white/5 border border-white/10 rounded-2xl p-5" style={{ border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 0 40px rgba(255,0,150,0.08)' }}>
                 <ShareButtons
                   firstname1={person1_firstname}
                   firstname2={person2_firstname}
@@ -685,8 +768,8 @@ export default function HomePage() {
               </div>
 
               {/* Free Insights */}
-              {insights && (insights.strongest || insights.weakest || insights.potential) && (
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-3">
+              {insights && (insights.strongest || insights.weakest || insights.potential || insights.firstImpression || insights.destiny || insights.hiddenTension || insights.communication || insights.karmic) && (
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-3" style={{ border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 0 40px rgba(255,0,150,0.08)' }}>
                   <h3 className="text-base font-bold text-center text-gray-200">{t.preview.insights.title}</h3>
                   <div className="space-y-2.5 text-left">
                     {insights.potential && (
@@ -716,26 +799,57 @@ export default function HomePage() {
                         </div>
                       </div>
                     )}
+                    {insights.firstImpression && (
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-xl">👁️</span>
+                        <div className="flex-1">
+                          <p className="font-semibold text-blue-400 text-sm">{t.preview.insights.firstImpression}</p>
+                          <p className="text-gray-300 text-xs leading-relaxed">{insights.firstImpression}</p>
+                        </div>
+                      </div>
+                    )}
+                    {insights.destiny && (
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-xl">🌟</span>
+                        <div className="flex-1">
+                          <p className="font-semibold text-pink-400 text-sm">{t.preview.insights.destiny}</p>
+                          <p className="text-gray-300 text-xs leading-relaxed">{insights.destiny}</p>
+                        </div>
+                      </div>
+                    )}
+                    {insights.hiddenTension && (
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-xl">⚖️</span>
+                        <div className="flex-1">
+                          <p className="font-semibold text-red-400 text-sm">{t.preview.insights.hiddenTension}</p>
+                          <p className="text-gray-300 text-xs leading-relaxed">{insights.hiddenTension}</p>
+                        </div>
+                      </div>
+                    )}
+                    {insights.communication && (
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-xl">💬</span>
+                        <div className="flex-1">
+                          <p className="font-semibold text-cyan-400 text-sm">{t.preview.insights.communication}</p>
+                          <p className="text-gray-300 text-xs leading-relaxed">{insights.communication}</p>
+                        </div>
+                      </div>
+                    )}
+                    {insights.karmic && (
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-xl">🜁</span>
+                        <div className="flex-1">
+                          <p className="font-semibold text-violet-400 text-sm">{t.preview.insights.karmic}</p>
+                          <p className="text-gray-300 text-xs leading-relaxed">{insights.karmic}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
 
-              {/* Target Audience Section */}
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-3">
-                <h3 className="text-base font-bold text-center text-gray-200">{t.preview.target.title}</h3>
-                <p className="text-xs text-gray-400 text-center mb-2">{t.preview.target.description}</p>
-                <ul className="space-y-1.5 text-left">
-                  {t.preview.target.items.map((item, index) => (
-                    <li key={index} className="flex items-start gap-2 text-xs text-gray-300">
-                      <span className="text-purple-400 mt-0.5">✓</span>
-                      <span className="leading-relaxed">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
               {/* Benefits List */}
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-3">
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-3" style={{ border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 0 40px rgba(255,0,150,0.08)' }}>
                 <h3 className="text-base font-bold text-center text-gray-200">{t.preview.benefits.title}</h3>
                 <ul className="space-y-1.5 text-left">
                   {t.preview.benefits.items.map((item, index) => (
@@ -748,7 +862,7 @@ export default function HomePage() {
               </div>
 
               {/* PDF Premium Encart */}
-              <div className="bg-gradient-to-r from-yellow-500/10 via-purple-500/10 to-pink-500/10 border border-yellow-400/20 rounded-2xl p-4 text-center">
+              <div className="bg-gradient-to-r from-yellow-500/10 via-purple-500/10 to-pink-500/10 border border-yellow-400/20 rounded-2xl p-4 text-center" style={{ border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 0 40px rgba(255,0,150,0.08)' }}>
                 <p className="text-base font-bold text-yellow-400 mb-1">{t.preview.pdf.title}</p>
                 <p className="text-xs text-gray-300">{t.preview.pdf.desc}</p>
               </div>
@@ -769,6 +883,20 @@ export default function HomePage() {
                     <span>{item}</span>
                   </div>
                 ))}
+              </div>
+
+              {/* Target Audience Section - Moved to bottom */}
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-3" style={{ border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 0 40px rgba(255,0,150,0.08)' }}>
+                <h3 className="text-base font-bold text-center text-gray-200">{t.preview.target.title}</h3>
+                <p className="text-xs text-gray-400 text-center mb-2">{t.preview.target.description}</p>
+                <ul className="space-y-1.5 text-left">
+                  {t.preview.target.items.map((item, index) => (
+                    <li key={index} className="flex items-start gap-2 text-xs text-gray-300">
+                      <span className="text-purple-400 mt-0.5">✓</span>
+                      <span className="leading-relaxed">{item}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
           </div>
