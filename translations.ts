@@ -20,8 +20,34 @@ export const translations = {
       timeLabel: 'Heure de naissance',
     },
     preview: {
-      title: 'Votre compatibilité:',
-      description: 'Débloquez votre rapport complet pour découvrir tous les détails de votre compatibilité astrologique.',
+      title: 'Compatibilité entre {firstname1} & {firstname2}',
+      badge: '🔥 Le rapport le plus demandé en 2025',
+      shareTitle: '✨ Partagez votre score ✨',
+      insights: {
+        title: 'Quelques révélations gratuites',
+        strongest: 'Votre force principale',
+        weakest: 'Votre point de tension',
+        potential: 'Votre potentiel',
+      },
+      benefits: {
+        title: '💫 Ce que contient le rapport complet :',
+        items: [
+          'Analyse des 4 piliers de compatibilité',
+          'Lecture karmique du lien (Noeuds Lunaires, V2)',
+          'Tension cachée + potentiel d\'évolution',
+          'Score d\'intensité, destin, première impression',
+          'Analyse des aspects planétaires',
+          'Recommandations personnalisées',
+          'PDF premium à télécharger',
+          'Interprétations en profondeur (≈ 8–12 pages)',
+        ],
+      },
+      pdf: {
+        title: '📄 PDF Premium inclus',
+        desc: '≈ 10 pages d\'interprétations astrologiques détaillées',
+      },
+      cta: '❤️ Découvrir votre destin amoureux — 9,90€',
+      secure: 'Paiement sécurisé par Stripe • Accès immédiat',
       unlock: 'Débloquer le rapport complet - 9,90€',
     },
     report: {
@@ -96,8 +122,34 @@ export const translations = {
       timeLabel: 'Time of birth',
     },
     preview: {
-      title: 'Your compatibility:',
-      description: 'Unlock your full report to discover all the details of your astrological compatibility.',
+      title: 'Compatibility between {firstname1} & {firstname2}',
+      badge: '🔥 The most requested report in 2025',
+      shareTitle: '✨ Share your score ✨',
+      insights: {
+        title: 'Some free revelations',
+        strongest: 'Your main strength',
+        weakest: 'Your tension point',
+        potential: 'Your potential',
+      },
+      benefits: {
+        title: '💫 What the full report contains:',
+        items: [
+          'Analysis of the 4 compatibility pillars',
+          'Karmic reading of the bond (Lunar Nodes, V2)',
+          'Hidden tension + evolution potential',
+          'Intensity score, destiny, first impression',
+          'Planetary aspects analysis',
+          'Personalized recommendations',
+          'Premium PDF download',
+          'In-depth interpretations (≈ 8–12 pages)',
+        ],
+      },
+      pdf: {
+        title: '📄 Premium PDF included',
+        desc: '≈ 10 pages of detailed astrological interpretations',
+      },
+      cta: '❤️ Discover your love destiny — €9.90',
+      secure: 'Secure payment by Stripe • Instant access',
       unlock: 'Unlock full report - €9.90',
     },
     report: {

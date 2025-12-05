@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { translations } from '../translations'
 import PlaceAutocomplete from '../components/PlaceAutocomplete'
+import CompatibilityGauge from '../components/CompatibilityGauge'
+import ShareButtons from '../components/ShareButtons'
 
 declare global {
   interface Window {
@@ -211,6 +213,57 @@ export default function HomePage() {
     const { url } = await response.json()
     window.location.href = url
   }
+
+  const handleShare = () => {
+    if (window.plausible) {
+      window.plausible('score_shared')
+    }
+  }
+
+  // Extract insights from report
+  const getInsights = () => {
+    if (!preview) return null
+
+    const insights: {
+      strongest?: string
+      weakest?: string
+      potential?: string
+    } = {}
+
+    // Extract strongest dimension
+    if (preview.strongest_dimension) {
+      insights.strongest = preview.strongest_dimension
+    } else if (preview.analysis?.strongest_dimension) {
+      insights.strongest = preview.analysis.strongest_dimension
+    }
+
+    // Extract weakest dimension
+    if (preview.weakest_dimension) {
+      insights.weakest = preview.weakest_dimension
+    } else if (preview.analysis?.weakest_dimension) {
+      insights.weakest = preview.analysis.weakest_dimension
+    }
+
+    // Extract potential from interpretation
+    if (preview.interpretation?.description) {
+      const desc = preview.interpretation.description
+      // Try to extract a potential/evolution sentence
+      const sentences = desc.split(/[.!?]/).filter((s: string) => s.trim().length > 20)
+      if (sentences.length > 0) {
+        insights.potential = sentences[0].trim() + '.'
+      }
+    } else if (preview.analysis?.interpretation?.description) {
+      const desc = preview.analysis.interpretation.description
+      const sentences = desc.split(/[.!?]/).filter((s: string) => s.trim().length > 20)
+      if (sentences.length > 0) {
+        insights.potential = sentences[0].trim() + '.'
+      }
+    }
+
+    return insights
+  }
+
+  const insights = getInsights()
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a1a] via-[#1a0a2e] to-[#0a0a1a] text-white relative overflow-hidden">
@@ -521,20 +574,102 @@ export default function HomePage() {
             </form>
           </div>
         ) : (
-          <div className="bg-gradient-to-br from-white/10 via-white/5 to-white/5 border border-white/20 rounded-3xl p-10 backdrop-blur-2xl shadow-2xl text-center space-y-8 relative overflow-hidden">
+          <div className="bg-gradient-to-br from-white/10 via-white/5 to-white/5 border border-white/20 rounded-3xl p-8 backdrop-blur-2xl shadow-2xl relative overflow-hidden" style={{ boxShadow: '0 0 40px rgba(255,0,150,0.15)' }}>
+            {/* Mystical gradient effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 via-purple-500/10 to-pink-500/10 opacity-50 blur-3xl"></div>
-            <div className="relative z-10">
-              <div className="text-8xl mb-6 animate-pulse">🔮</div>
-              <h2 className="text-5xl font-bold bg-gradient-to-r from-yellow-400 via-purple-500 via-pink-500 to-rose-500 bg-clip-text text-transparent mb-4">
-                {t.preview.title} {preview.overall_score}%
-              </h2>
-              <p className="text-gray-300 text-xl leading-relaxed mb-8">{t.preview.description}</p>
+            
+            <div className="relative z-10 space-y-6">
+              {/* Title with names */}
+              <div className="text-center space-y-3">
+                <h2 className="text-4xl font-bold bg-gradient-to-r from-yellow-400 via-purple-500 via-pink-500 to-rose-500 bg-clip-text text-transparent">
+                  {t.preview.title.replace('{firstname1}', person1_firstname).replace('{firstname2}', person2_firstname)} : {preview.overall_score}%
+                </h2>
+                <p className="text-sm text-yellow-400/80 font-medium">{t.preview.badge}</p>
+              </div>
+
+              {/* Compatibility Gauge */}
+              <div className="flex justify-center py-2">
+                <CompatibilityGauge score={preview.overall_score} size={140} />
+              </div>
+
+              {/* Share Buttons */}
+              <div className="py-2">
+                <ShareButtons
+                  firstname1={person1_firstname}
+                  firstname2={person2_firstname}
+                  score={preview.overall_score}
+                  lang={lang}
+                  onShare={handleShare}
+                />
+              </div>
+
+              {/* Free Insights */}
+              {insights && (insights.strongest || insights.weakest || insights.potential) && (
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-4">
+                  <h3 className="text-lg font-bold text-center text-gray-200">{t.preview.insights.title}</h3>
+                  <div className="space-y-3 text-left">
+                    {insights.strongest && (
+                      <div className="flex items-start gap-3">
+                        <span className="text-2xl">💪</span>
+                        <div>
+                          <p className="font-semibold text-yellow-400">{t.preview.insights.strongest}</p>
+                          <p className="text-gray-300 text-sm">{insights.strongest}</p>
+                        </div>
+                      </div>
+                    )}
+                    {insights.weakest && (
+                      <div className="flex items-start gap-3">
+                        <span className="text-2xl">⚡</span>
+                        <div>
+                          <p className="font-semibold text-orange-400">{t.preview.insights.weakest}</p>
+                          <p className="text-gray-300 text-sm">{insights.weakest}</p>
+                        </div>
+                      </div>
+                    )}
+                    {insights.potential && (
+                      <div className="flex items-start gap-3">
+                        <span className="text-2xl">✨</span>
+                        <div>
+                          <p className="font-semibold text-purple-400">{t.preview.insights.potential}</p>
+                          <p className="text-gray-300 text-sm">{insights.potential}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Benefits List */}
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-3">
+                <h3 className="text-lg font-bold text-center text-gray-200">{t.preview.benefits.title}</h3>
+                <ul className="space-y-2 text-left">
+                  {t.preview.benefits.items.map((item, index) => (
+                    <li key={index} className="flex items-start gap-2 text-sm text-gray-300">
+                      <span className="text-yellow-400 mt-1">•</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* PDF Premium Encart */}
+              <div className="bg-gradient-to-r from-yellow-500/10 via-purple-500/10 to-pink-500/10 border border-yellow-400/20 rounded-2xl p-5 text-center">
+                <p className="text-lg font-bold text-yellow-400 mb-1">{t.preview.pdf.title}</p>
+                <p className="text-sm text-gray-300">{t.preview.pdf.desc}</p>
+              </div>
+
+              {/* CTA Button */}
               <button
                 onClick={handleCheckout}
                 className="w-full px-8 py-5 rounded-xl bg-gradient-to-r from-yellow-400 via-purple-500 via-pink-500 to-rose-500 text-black font-bold text-xl hover:opacity-90 transition shadow-2xl shadow-purple-500/50 hover:shadow-purple-500/70 hover:scale-105 transform duration-300"
               >
-                {t.preview.unlock}
+                {t.preview.cta}
               </button>
+
+              {/* Secure Payment Text */}
+              <p className="text-xs text-center text-gray-400">
+                {t.preview.secure}
+              </p>
             </div>
           </div>
         )}
