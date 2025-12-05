@@ -31,6 +31,7 @@ export default function HomePage() {
   const [person2_place, setPerson2Place] = useState('')
   const [person2_coords, setPerson2Coords] = useState<Coordinates | null>(null)
   const [email, setEmail] = useState('')
+  const [emailError, setEmailError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [preview, setPreview] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
@@ -42,6 +43,12 @@ export default function HomePage() {
   }, [])
 
   const t = translations[lang]
+
+  const validateEmail = (email: string): boolean => {
+    // Regex pour valider un email avec un domaine valide
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+    return emailRegex.test(email) && email.length > 0 && email.length <= 254
+  }
 
   const handleLangToggle = () => {
     const newLang = lang === 'fr' ? 'en' : 'fr'
@@ -82,6 +89,12 @@ export default function HomePage() {
       }
       if (!email) {
         setError(lang === 'fr' ? 'Veuillez entrer votre email' : 'Please enter your email')
+        setLoading(false)
+        return
+      }
+
+      if (!validateEmail(email)) {
+        setError(t.form.emailInvalid)
         setLoading(false)
         return
       }
@@ -448,10 +461,35 @@ export default function HomePage() {
                   type="email"
                   placeholder={t.form.email}
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    const newEmail = e.target.value
+                    setEmail(newEmail)
+                    if (newEmail && !validateEmail(newEmail)) {
+                      setEmailError(t.form.emailInvalid)
+                    } else {
+                      setEmailError(null)
+                    }
+                  }}
+                  onBlur={(e) => {
+                    if (e.target.value && !validateEmail(e.target.value)) {
+                      setEmailError(t.form.emailInvalid)
+                    } else {
+                      setEmailError(null)
+                    }
+                  }}
                   required
-                  className="w-full rounded-xl bg-white/5 border border-white/20 px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/50 transition shadow-lg"
+                  className={`w-full rounded-xl bg-white/5 border px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-lg ${
+                    emailError
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500/50'
+                      : 'border-white/20 focus:border-yellow-400 focus:ring-yellow-400/50'
+                  }`}
                 />
+                {emailError && (
+                  <p className="text-red-400 text-sm mt-1 flex items-center gap-1">
+                    <span>⚠️</span>
+                    {emailError}
+                  </p>
+                )}
               </div>
 
               {/* Error message */}
