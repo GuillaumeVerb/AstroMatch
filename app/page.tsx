@@ -358,33 +358,107 @@ export default function HomePage() {
       }
     }
 
-    // Extract communication insight from description
+    // Extract multiple insights from description
     const commDescPaths = [
       preview.interpretation?.description,
       preview.analysis?.interpretation?.description,
       preview.description,
       preview.analysis?.description,
     ]
+    
+    let allSentences: string[] = []
     for (const desc of commDescPaths) {
       if (desc && typeof desc === 'string') {
         const sentences = desc.split(/[.!?]/).filter((s: string) => s.trim().length > 15 && s.trim().length < 120)
-        // Look for communication-related sentences
-        if (!insights.communication) {
-          const commSentence = sentences.find((s: string) => 
-            /communication|dialogue|échange|parler|écouter/i.test(s)
-          )
-          if (commSentence) {
-            insights.communication = commSentence.trim() + '.'
-          }
-        }
-        // Look for karmic-related sentences
-        if (!insights.karmic) {
-          const karmicSentence = sentences.find((s: string) => 
-            /karmique|karma|destin|mission|réincarnation/i.test(s)
-          )
-          if (karmicSentence) {
-            insights.karmic = karmicSentence.trim() + '.'
-          }
+        allSentences = [...allSentences, ...sentences]
+      }
+    }
+
+    // Extract communication insight
+    if (!insights.communication && allSentences.length > 0) {
+      const commSentence = allSentences.find((s: string) => 
+        /communication|dialogue|échange|parler|écouter|conversation/i.test(s)
+      )
+      if (commSentence) {
+        insights.communication = commSentence.trim() + '.'
+      }
+    }
+
+    // Extract karmic insight
+    if (!insights.karmic && allSentences.length > 0) {
+      const karmicSentence = allSentences.find((s: string) => 
+        /karmique|karma|destin|mission|réincarnation|nœud|lunaire/i.test(s)
+      )
+      if (karmicSentence) {
+        insights.karmic = karmicSentence.trim() + '.'
+      }
+    }
+
+    // Extract hidden tension from sentences
+    if (!insights.hiddenTension && allSentences.length > 0) {
+      const tensionSentence = allSentences.find((s: string) => 
+        /tension|défi|challenge|difficulté|conflit|opposition/i.test(s)
+      )
+      if (tensionSentence) {
+        insights.hiddenTension = tensionSentence.trim() + '.'
+      }
+    }
+
+    // Extract destiny from sentences if not found
+    if (!insights.destiny && allSentences.length > 0) {
+      const destinySentence = allSentences.find((s: string) => 
+        /destin|destinée|avenir|futur|évolution|croissance/i.test(s)
+      )
+      if (destinySentence) {
+        insights.destiny = destinySentence.trim() + '.'
+      }
+    }
+
+    // Extract first impression from sentences if not found
+    if (!insights.firstImpression && allSentences.length > 0) {
+      const firstImpSentence = allSentences.find((s: string) => 
+        /première|impression|rencontre|attirance|magnétisme/i.test(s)
+      )
+      if (firstImpSentence) {
+        insights.firstImpression = firstImpSentence.trim() + '.'
+      }
+    }
+
+    // Generate generic insights based on score if we don't have enough
+    const score = preview.overall_score || 50
+    const hasEnoughInsights = Object.keys(insights).filter(k => insights[k as keyof typeof insights]).length >= 3
+
+    if (!hasEnoughInsights) {
+      // Generate generic insights based on score
+      if (!insights.strongest && score >= 60) {
+        insights.strongest = lang === 'fr' 
+          ? 'Une connexion émotionnelle solide et une bonne compréhension mutuelle.'
+          : 'A strong emotional connection and good mutual understanding.'
+      }
+      
+      if (!insights.weakest && score < 70) {
+        insights.weakest = lang === 'fr'
+          ? 'Des différences de vision à harmoniser pour une relation durable.'
+          : 'Differences in vision to harmonize for a lasting relationship.'
+      }
+
+      if (!insights.destiny) {
+        insights.destiny = lang === 'fr'
+          ? score >= 60 
+            ? 'Un potentiel d\'évolution positive et de croissance mutuelle.'
+            : 'Un chemin d\'évolution avec des défis à transformer en opportunités.'
+          : score >= 60
+            ? 'A potential for positive evolution and mutual growth.'
+            : 'A path of evolution with challenges to transform into opportunities.'
+      }
+
+      if (!insights.communication && allSentences.length > 0) {
+        // Take any meaningful sentence about the relationship
+        const genericSentence = allSentences.find((s: string) => 
+          /relation|couple|partenariat|union|harmonie/i.test(s)
+        )
+        if (genericSentence) {
+          insights.communication = genericSentence.trim() + '.'
         }
       }
     }
