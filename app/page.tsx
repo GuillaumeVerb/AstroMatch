@@ -46,6 +46,31 @@ export default function HomePage() {
   useEffect(() => {
     const savedLang = localStorage.getItem('astromatch_lang') as 'fr' | 'en' | null
     if (savedLang) setLang(savedLang)
+
+    // Charger les données du formulaire sauvegardées
+    const savedForm = localStorage.getItem('astromatch_form_data')
+    if (savedForm) {
+      try {
+        const formData = JSON.parse(savedForm)
+        setPerson1Firstname(formData.person1_firstname || '')
+        setPerson1Date(formData.person1_date || '')
+        setPerson1Time(formData.person1_time || '12:00')
+        setPerson1Place(formData.person1_place || '')
+        if (formData.person1_coords) {
+          setPerson1Coords(formData.person1_coords)
+        }
+        setPerson2Firstname(formData.person2_firstname || '')
+        setPerson2Date(formData.person2_date || '')
+        setPerson2Time(formData.person2_time || '12:00')
+        setPerson2Place(formData.person2_place || '')
+        if (formData.person2_coords) {
+          setPerson2Coords(formData.person2_coords)
+        }
+        setEmail(formData.email || '')
+      } catch (e) {
+        console.error('Error loading form data:', e)
+      }
+    }
   }, [])
 
   const t = translations[lang]
@@ -184,6 +209,21 @@ export default function HomePage() {
       localStorage.setItem('astromatch_firstname1', person1_firstname)
       localStorage.setItem('astromatch_firstname2', person2_firstname)
 
+      // Sauvegarder les données du formulaire pour les conserver
+      localStorage.setItem('astromatch_form_data', JSON.stringify({
+        person1_firstname,
+        person1_date,
+        person1_time,
+        person1_place,
+        person1_coords,
+        person2_firstname,
+        person2_date,
+        person2_time,
+        person2_place,
+        person2_coords,
+        email,
+      }))
+
       setPreview(report)
 
       if (window.plausible) {
@@ -202,6 +242,15 @@ export default function HomePage() {
       }
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleNewCalculation = () => {
+    setPreview(null)
+    // Les données du formulaire restent intactes grâce à localStorage
+    // L'utilisateur peut modifier et recalculer
+    if (window.plausible) {
+      window.plausible('new_calculation_clicked')
     }
   }
 
@@ -814,7 +863,16 @@ export default function HomePage() {
             
             <div className="relative z-10 space-y-5">
               {/* Title with names - Score removed from title */}
-              <div className="text-center space-y-2">
+              <div className="text-center space-y-2 relative">
+                {/* Nouveau calcul button - top right */}
+                <button
+                  onClick={handleNewCalculation}
+                  className="absolute top-0 right-0 px-4 py-2 rounded-xl bg-white/5 border border-white/20 hover:bg-white/10 transition text-sm text-gray-300 flex items-center gap-2"
+                  aria-label={lang === 'fr' ? 'Nouveau calcul' : 'New calculation'}
+                >
+                  <span>↻</span>
+                  <span>{lang === 'fr' ? 'Nouveau calcul' : 'New calculation'}</span>
+                </button>
                 <h2 className="text-3xl font-bold bg-gradient-to-r from-yellow-400 via-purple-500 via-pink-500 to-rose-500 bg-clip-text text-transparent">
                   {t.preview.title.replace('{firstname1}', person1_firstname).replace('{firstname2}', person2_firstname)}
                 </h2>

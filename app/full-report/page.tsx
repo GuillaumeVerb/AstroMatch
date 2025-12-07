@@ -27,6 +27,13 @@ function FullReportContent() {
     if (savedLang) setLang(savedLang)
 
     const sessionId = searchParams.get('session_id')
+    const testParam = searchParams.get('test') === 'true'
+    
+    // Test mode: allow access via env variable (production/staging) or URL param (dev only)
+    const isTestMode = 
+      process.env.NEXT_PUBLIC_TEST_MODE === 'true' || 
+      (typeof window !== 'undefined' && process.env.NODE_ENV === 'development' && testParam)
+
     if (sessionId) {
       fetch('/api/verify-access', {
         method: 'POST',
@@ -37,6 +44,12 @@ function FullReportContent() {
           window.plausible('premium_unlocked')
         }
       }).catch(err => console.error('Error verifying access:', err))
+    } else if (isTestMode) {
+      // Test mode: allow access without payment
+      if (window.plausible) {
+        window.plausible('test_mode_accessed')
+      }
+      console.log('🧪 Test mode enabled - PDF access granted')
     }
 
     const savedReport = localStorage.getItem('astromatch_report')
