@@ -258,6 +258,23 @@ export default function HomePage() {
     if (window.plausible) {
       window.plausible('paywall_viewed')
     }
+
+    // Vérifier le mode test
+    const isTestMode = 
+      process.env.NEXT_PUBLIC_TEST_MODE === 'true' || 
+      (typeof window !== 'undefined' && window.location.search.includes('test=true'))
+
+    if (isTestMode) {
+      // Mode test : rediriger directement vers full-report sans payer
+      if (window.plausible) {
+        window.plausible('test_checkout_bypassed')
+      }
+      console.log('🧪 Test mode: bypassing Stripe checkout')
+      window.location.href = '/full-report?test=true'
+      return
+    }
+
+    // Mode normal : passer par Stripe
     const response = await fetch('/api/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
