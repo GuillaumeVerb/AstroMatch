@@ -17,9 +17,25 @@ export async function POST(request: NextRequest) {
     })
 
     if (!response.ok) {
-      const errorText = await response.text()
+      let errorData: any
+      try {
+        const errorText = await response.text()
+        errorData = JSON.parse(errorText)
+      } catch {
+        errorData = { error: 'Failed to generate PDF' }
+      }
+      
+      // Log detailed error for debugging
+      console.error('PDF API Error:', {
+        status: response.status,
+        error: errorData,
+      })
+      
       return NextResponse.json(
-        { error: errorText },
+        { 
+          error: errorData.error || errorData.details || 'Erreur lors de la génération du PDF',
+          details: errorData.details,
+        },
         { status: response.status }
       )
     }

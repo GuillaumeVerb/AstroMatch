@@ -156,7 +156,27 @@ function FullReportContent() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Failed to generate PDF' }))
-        throw new Error(errorData.error || t.report.pdfError || 'Error downloading PDF')
+        
+        // Log error for debugging
+        console.error('PDF download error:', errorData)
+        
+        // User-friendly error message
+        let errorMessage = t.report.pdfError || 'Erreur lors du téléchargement du PDF'
+        
+        if (errorData.details) {
+          // Backend error (like missing library)
+          if (errorData.details.includes('libgobject') || errorData.details.includes('library')) {
+            errorMessage = lang === 'fr' 
+              ? 'Erreur serveur lors de la génération du PDF. Veuillez réessayer dans quelques instants.'
+              : 'Server error while generating PDF. Please try again in a few moments.'
+          } else {
+            errorMessage = errorData.error || errorData.details
+          }
+        } else if (errorData.error) {
+          errorMessage = errorData.error
+        }
+        
+        throw new Error(errorMessage)
       }
 
       const blob = await response.blob()
