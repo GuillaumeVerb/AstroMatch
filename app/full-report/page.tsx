@@ -17,6 +17,7 @@ function FullReportContent() {
   const [report, setReport] = useState<any>(null)
   const [firstname1, setFirstname1] = useState('')
   const [firstname2, setFirstname2] = useState('')
+  const [formData, setFormData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [pdfLoading, setPdfLoading] = useState(false)
   const searchParams = useSearchParams()
@@ -56,10 +57,30 @@ function FullReportContent() {
     const savedFirstname1 = localStorage.getItem('astromatch_firstname1')
     const savedFirstname2 = localStorage.getItem('astromatch_firstname2')
 
+    // Charger les données du formulaire sauvegardées
+    const savedFormData = localStorage.getItem('astromatch_form_data')
+    if (savedFormData) {
+      try {
+        const parsedFormData = JSON.parse(savedFormData)
+        setFormData(parsedFormData)
+      } catch (e) {
+        console.error('Error loading form data:', e)
+      }
+    }
+
     if (savedReport) {
-      setReport(JSON.parse(savedReport))
+      const parsedReport = JSON.parse(savedReport)
+      setReport(parsedReport)
       setFirstname1(savedFirstname1 || '')
       setFirstname2(savedFirstname2 || '')
+      
+      // Debug: vérifier le score
+      console.log('📊 Report loaded:', {
+        overall_score: parsedReport.overall_score,
+        hasPerson1: !!parsedReport.person1,
+        hasPerson2: !!parsedReport.person2,
+        reportKeys: Object.keys(parsedReport),
+      })
     }
     setLoading(false)
   }, [searchParams])
@@ -73,7 +94,12 @@ function FullReportContent() {
   }
 
   const handleDownloadPDF = async () => {
-    if (!report || pdfLoading) return
+    if (!report || pdfLoading) {
+      if (!formData) {
+        showToast(lang === 'fr' ? 'Données du formulaire manquantes. Veuillez refaire un calcul.' : 'Form data missing. Please recalculate.', 'error')
+      }
+      return
+    }
 
     const startTime = Date.now()
     setPdfLoading(true)
@@ -81,22 +107,49 @@ function FullReportContent() {
     try {
       showToast(t.report.pdfGenerating || 'Génération du PDF en cours...', 'info')
 
+      // Utiliser formData si disponible, sinon essayer report.person1 (fallback)
+      const person1Data = formData ? {
+        firstname: firstname1,
+        date: formData.person1_date || '',
+        time: formData.person1_time || '',
+        place: formData.person1_place || '',
+        lat: formData.person1_coords?.lat || '',
+        lon: formData.person1_coords?.lon || '',
+        country: formData.person1_coords?.country || '',
+      } : {
+        firstname: firstname1,
+        date: report.person1?.date || '',
+        time: report.person1?.time || '',
+        place: report.person1?.place || '',
+        lat: report.person1?.lat || '',
+        lon: report.person1?.lon || '',
+        country: report.person1?.country || '',
+      }
+
+      const person2Data = formData ? {
+        firstname: firstname2,
+        date: formData.person2_date || '',
+        time: formData.person2_time || '',
+        place: formData.person2_place || '',
+        lat: formData.person2_coords?.lat || '',
+        lon: formData.person2_coords?.lon || '',
+        country: formData.person2_coords?.country || '',
+      } : {
+        firstname: firstname2,
+        date: report.person2?.date || '',
+        time: report.person2?.time || '',
+        place: report.person2?.place || '',
+        lat: report.person2?.lat || '',
+        lon: report.person2?.lon || '',
+        country: report.person2?.country || '',
+      }
+
       const response = await fetch('/api/pdf', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          person1: {
-            firstname: firstname1,
-            date: report.person1?.date || '',
-            time: report.person1?.time || '',
-            place: report.person1?.place || '',
-          },
-          person2: {
-            firstname: firstname2,
-            date: report.person2?.date || '',
-            time: report.person2?.time || '',
-            place: report.person2?.place || '',
-          },
+          person1: person1Data,
+          person2: person2Data,
           report,
         }),
       })
@@ -200,7 +253,9 @@ function FullReportContent() {
             {t.report.title.replace('{firstname1}', firstname1).replace('{firstname2}', firstname2)}
           </h2>
           <div className="text-5xl font-bold bg-gradient-to-r from-yellow-400 to-purple-500 bg-clip-text text-transparent mb-6">
-            {report.overall_score}%
+            {typeof report.overall_score === 'number' 
+              ? report.overall_score.toFixed(2) 
+              : report.overall_score || '0'}%
           </div>
           <div className="flex gap-4">
             <button
