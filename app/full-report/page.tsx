@@ -171,8 +171,8 @@ function FullReportContent() {
         const errorString = JSON.stringify(errorData).toLowerCase()
         if (errorData.details || errorString.includes('libgobject') || errorString.includes('library') || errorString.includes('shared object')) {
           errorMessage = lang === 'fr' 
-            ? 'Erreur serveur lors de la génération du PDF. Le serveur est en cours de mise à jour. Veuillez réessayer dans quelques instants.'
-            : 'Server error while generating PDF. The server is being updated. Please try again in a few moments.'
+            ? '⚠️ Erreur serveur : bibliothèque système manquante. Le backend doit être mis à jour avec les dépendances nécessaires. Contactez le support si le problème persiste.'
+            : '⚠️ Server error: missing system library. The backend needs to be updated with required dependencies. Contact support if the issue persists.'
         } else if (errorData.error && errorData.error !== 'Internal server error') {
           errorMessage = errorData.error
         } else if (errorData.details) {

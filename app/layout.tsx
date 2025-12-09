@@ -7,7 +7,7 @@ import { ToastProvider } from '../components/ToastContainer'
 const inter = Inter({ 
   subsets: ['latin'],
   display: 'swap',
-  preload: true,
+  preload: false, // Évite le warning de préchargement non utilisé
 })
 
 export const metadata: Metadata = {
