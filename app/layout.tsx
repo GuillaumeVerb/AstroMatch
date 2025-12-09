@@ -4,7 +4,11 @@ import './globals.css'
 import Script from 'next/script'
 import { ToastProvider } from '../components/ToastContainer'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ 
+  subsets: ['latin'],
+  display: 'swap',
+  preload: true,
+})
 
 export const metadata: Metadata = {
   title: 'AstroMatch - Compatibilité Astrologique',

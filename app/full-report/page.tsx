@@ -158,22 +158,25 @@ function FullReportContent() {
         const errorData = await response.json().catch(() => ({ error: 'Failed to generate PDF' }))
         
         // Log error for debugging
-        console.error('PDF download error:', errorData)
+        console.error('PDF download error:', {
+          status: response.status,
+          errorData,
+          fullError: JSON.stringify(errorData, null, 2),
+        })
         
         // User-friendly error message
         let errorMessage = t.report.pdfError || 'Erreur lors du téléchargement du PDF'
         
-        if (errorData.details) {
-          // Backend error (like missing library)
-          if (errorData.details.includes('libgobject') || errorData.details.includes('library')) {
-            errorMessage = lang === 'fr' 
-              ? 'Erreur serveur lors de la génération du PDF. Veuillez réessayer dans quelques instants.'
-              : 'Server error while generating PDF. Please try again in a few moments.'
-          } else {
-            errorMessage = errorData.error || errorData.details
-          }
-        } else if (errorData.error) {
+        // Check for backend library errors
+        const errorString = JSON.stringify(errorData).toLowerCase()
+        if (errorData.details || errorString.includes('libgobject') || errorString.includes('library') || errorString.includes('shared object')) {
+          errorMessage = lang === 'fr' 
+            ? 'Erreur serveur lors de la génération du PDF. Le serveur est en cours de mise à jour. Veuillez réessayer dans quelques instants.'
+            : 'Server error while generating PDF. The server is being updated. Please try again in a few moments.'
+        } else if (errorData.error && errorData.error !== 'Internal server error') {
           errorMessage = errorData.error
+        } else if (errorData.details) {
+          errorMessage = errorData.details
         }
         
         throw new Error(errorMessage)
