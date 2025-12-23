@@ -169,10 +169,10 @@ function FullReportContent() {
         
         // Check for backend library errors
         const errorString = JSON.stringify(errorData).toLowerCase()
-        if (errorData.details || errorString.includes('libgobject') || errorString.includes('library') || errorString.includes('shared object')) {
+        if (errorData.details || errorString.includes('libgobject') || errorString.includes('library') || errorString.includes('shared object') || errorString.includes('internal server error')) {
           errorMessage = lang === 'fr' 
-            ? '⚠️ Erreur serveur : bibliothèque système manquante. Le backend doit être mis à jour avec les dépendances nécessaires. Contactez le support si le problème persiste.'
-            : '⚠️ Server error: missing system library. The backend needs to be updated with required dependencies. Contact support if the issue persists.'
+            ? t.report.pdfServerError || 'Le service de génération PDF est temporairement indisponible. Veuillez réessayer dans quelques instants.'
+            : t.report.pdfServerErrorEn || 'PDF generation service is temporarily unavailable. Please try again in a few moments.'
         } else if (errorData.error && errorData.error !== 'Internal server error') {
           errorMessage = errorData.error
         } else if (errorData.details) {

@@ -119,6 +119,8 @@ export const translations = {
       pdfGenerating: 'Génération du PDF...',
       pdfSuccess: 'PDF téléchargé avec succès !',
       pdfError: 'Erreur lors du téléchargement du PDF',
+      pdfServerError: 'Le service de génération PDF est temporairement indisponible. Veuillez réessayer dans quelques instants.',
+      pdfServerErrorEn: 'PDF generation service is temporarily unavailable. Please try again in a few moments.',
     },
     history: {
       title: 'Historique des compatibilités',
@@ -280,6 +282,8 @@ export const translations = {
       pdfGenerating: 'Generating PDF...',
       pdfSuccess: 'PDF downloaded successfully!',
       pdfError: 'Error downloading PDF',
+      pdfServerError: 'PDF generation service is temporarily unavailable. Please try again in a few moments.',
+      pdfServerErrorEn: 'PDF generation service is temporarily unavailable. Please try again in a few moments.',
     },
     history: {
       title: 'Compatibility history',
